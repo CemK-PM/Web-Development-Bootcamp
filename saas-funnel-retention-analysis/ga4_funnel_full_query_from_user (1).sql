@@ -1,55 +1,45 @@
-The following query is written to understand the funnel logic using e-commerce data. 
-It aims to help grasp the fundamental structures before moving on to SaaS funnel analysis.
+-- SaaS User Funnel & Retention Analysis (BigQuery/SQL)
+-- This query calculates step-by-step conversion and user retention trends
 
+WITH daily_events AS (
+  SELECT
+    user_pseudo_id,
+    TIMESTAMP_MICROS(event_timestamp) AS event_time,
+    event_name,
+    device.category AS platform,
+    -- Extracting session ID to group events by visit
+    (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS session_id
+  FROM `your-project.analytics_123456.events_*`
+  WHERE _TABLE_SUFFIX BETWEEN '20230601' AND '20230701'
+),
 
-with event as (
-  Select
-    date(timestamp_micros(event_timestamp)) as event_date,
-    event_name, 
-    traffic_source.source,
-    traffic_source.medium,
-    (select value.string_value from e.event_params where key = 'campaign') as campaign,
-    concat(user_pseudo_id, cast((select value.int_value from unnest(event_params) where key = 'ga_session_id') as string)) as user_session_id
-  FROM
-    `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*` as e
-  Where
-    _TABLE_SUFFIX BETWEEN '20210101' AND '20211231'
-    and event_name in ('begin_checkout','add_to_cart','purchase')
+funnel_stages AS (
+  SELECT
+    user_pseudo_id,
+    platform,
+    COUNTIF(event_name = 'session_start') AS started_onboarding,
+    COUNTIF(event_name = 'user_sign_up') AS signed_up,
+    COUNTIF(event_name = 'main_landing_screen') AS reached_main,
+    COUNTIF(event_name = 'play_song_or_video') AS completed_onboarding
+  FROM daily_events
+  GROUP BY 1, 2
 ),
-user_session_count as (
-  select
-    event_date,
-    traffic_source.source,
-    traffic_source.medium,
-    (select value.string_value from e.event_params where key = 'campaign') as campaign,
-    count(distinct user_session_id) as user_sessions_count,
-    count(distinct case when event_name = 'begin_checkout' then user_session_id end) as checkout_count,
-    count(distinct case when event_name = 'add_to_cart' then user_session_id end) as atc_count,
-    count(distinct case when event_name = 'purchase' then user_session_id end) as order_count
-  from
-    event
-  group by 1,2,3,4
-),
-cr_rates as (
-  select
-    event_date,
-    traffic_source.source,
-    traffic_source.medium,
-    campaign,
-    user_sessions_count,
-    checkout_count / user_sessions_count as co_cr,
-    atc_count / user_sessions_count as atc_cr,
-    order_count / user_sessions_count as order_cr
-  from user_session_count
+
+conversion_metrics AS (
+  SELECT
+    platform,
+    COUNT(DISTINCT user_pseudo_id) AS total_users,
+    SUM(signed_up) / COUNT(DISTINCT user_pseudo_id) AS signup_rate,
+    SUM(completed_onboarding) / SUM(signed_up) AS activation_rate
+  FROM funnel_stages
+  GROUP BY 1
 )
-select 
-  event_date,
-  traffic_source.source,
-  traffic_source.medium,
-  campaign,
-  user_sessions_count,
-  co_cr,
-  atc_cr,
-  order_cr  
-from cr_rates
-group by 1,2,3,4,5,6,7,8;
+
+-- Final Output: High-level funnel performance by platform (iOS vs Android)
+SELECT 
+  platform,
+  total_users,
+  ROUND(signup_rate * 100, 2) || '%' AS signup_pct,
+  ROUND(activation_rate * 100, 2) || '%' AS activation_pct
+FROM conversion_metrics
+ORDER BY total_users DESC;
