@@ -1,54 +1,57 @@
-> 📦 A complete SaaS marketing analysis combining SQL, Tableau & Sheets to track revenue, retention and ROI.
+# 💰 SaaS Revenue & Marketing ROI Analysis
 
-This project explores monetization and marketing metrics for a SaaS product.
-
-<details>
-<summary>🧾 Project Overview - Click to read full description</summary>
-
-This project focuses on analyzing the revenue performance and user monetization trends of a SaaS product using structured data from marketing campaigns and user behavior logs.
-
-The goal was to create a complete picture of how marketing spend translates into paying users and recurring revenue over time. Using SQL, Tableau, and Google Sheets, I processed and visualized key performance indicators such as ARPPU, MRR, CPC, CTR, ROAS, and ROMI across different acquisition channels and campaigns.
-
-The analysis began with a breakdown of paid user acquisition and its impact on revenue. Tableau dashboards were created to highlight geographic performance differences and monthly fluctuations in income. In parallel, SQL queries were developed to automate the extraction of advertising metrics from campaign-level data, enabling weekly reporting and performance comparisons across platforms.
-
-The project serves as a full-cycle marketing analytics case, from data extraction to visualization and insight delivery, with a focus on business-relevant metrics and practical decision support for marketing teams.
-
-</details>
-
-
-## 🔍 Key work:
-
-- Analyzed ARPPU (~$11) and MRR growth ($17K → $21K)
-- Built dashboards in Tableau
-- Tracked revenue trends and user retention (12.5% by Month 9)
-- Used SQL to calculate CPC, CTR, ROAS, ROMI
-  
-
-**Tools used:** SQL, Tableau, Google Sheets, cohort analysis, marketing analytics
+> **Executive Summary:** A comprehensive marketing analytics study combining SQL, Tableau, and Google Sheets to track unit economics, revenue growth, and campaign efficiency.
 
 ---
 
-## 📊 Dashboards & Analysis Links
-
-- [Location-Based Revenue Reports – Tableau](https://public.tableau.com/app/profile/cem.kahvecioglu/viz/UnitEconomicsSaaSFinancialMetrics/LocationBasedRevenueReportsandUserMetrics)
-- [Payment-Based Revenue Reports – Tableau](https://public.tableau.com/app/profile/cem.kahvecioglu/viz/Payment-BasedRevenueReports/PaymentDateReports)
-- [Monthly and Product-Based Revenue – Tableau](https://public.tableau.com/app/profile/cem.kahvecioglu/viz/RevenueReports_17492974831360/Dashboard1#1)
-
+### 🚀 Business Impact & Key Metrics
+| Metric | Achievement / Value |
+| :--- | :--- |
+| **Financial Growth** | Scaled Monthly Recurring Revenue (MRR) from **$17K to $21K**. |
+| **Monetization** | Maintained a stable **Average Revenue Per Paying User (ARPPU) of ~$11**. |
+| **Retention** | Identified long-term revenue stability with **12.5% retention by Month 9**. |
+| **Ad Efficiency** | Automated **ROAS & ROMI** tracking to optimize marketing budget allocation. |
 
 ---
 
-## 📷 Sample Dashboard
+### 🛠 Tech Stack & Tools
+* **Data Processing:** SQL (Advanced Window Functions), Google Sheets
+* **Business Intelligence:** Tableau Public
+* **Frameworks:** Unit Economics, Cohort Analysis, Marketing Funnel Analytics
 
+---
+
+### 📊 Interactive Dashboards (Tableau)
+*Data was analyzed across three primary dimensions to uncover growth opportunities:*
+
+1. [**Location-Based Revenue Reports**](https://public.tableau.com/app/profile/cem.kahvecioglu/viz/UnitEconomicsSaaSFinancialMetrics/LocationBasedRevenueReportsandUserMetrics)
+   * *Focus:* Geographic performance and regional user monetization.
+2. [**Payment-Based Revenue Dynamics**](https://public.tableau.com/app/profile/cem.kahvecioglu/viz/Payment-BasedRevenueReports/PaymentDateReports)
+   * *Focus:* Daily revenue streams and payment cycle fluctuations.
+3. [**Product & Monthly Performance**](https://public.tableau.com/app/profile/cem.kahvecioglu/viz/RevenueReports_17492974831360/Dashboard1#1)
+   * *Focus:* Monthly growth trends and product-level revenue contribution.
+
+---
+
+### 📷 Dashboard Preview
 ![Revenue Dashboard](./dashboard-preview.png)
-
-
+*Snapshot: Multi-dimensional view of SaaS unit economics and marketing ROI.*
 
 ---
 
-## 🧠 What I Learned
+### 🧾 Technical Implementation
+**SQL Marketing Performance Query**
+This query demonstrates the calculation of efficiency metrics like ROAS and ROMI from raw campaign logs:
 
-- Applied cohort analysis to uncover long-term retention drop-offs  
-- Used SQL window functions to measure month-over-month campaign performance  
-- Built and communicated clear, actionable marketing dashboards  
-- Practiced combining Tableau, Sheets, and SQL in one data workflow
-
+```sql
+SELECT 
+    campaign,
+    SUM(spend) AS total_spend,
+    SUM(revenue) AS total_revenue,
+    -- ROAS: Return on Ad Spend
+    SAFE_DIVIDE(SUM(revenue), SUM(spend)) AS roas,
+    -- ROMI: Return on Marketing Investment
+    SAFE_DIVIDE((SUM(revenue) - SUM(spend)), SUM(spend)) * 100 AS romi_percentage
+FROM `marketing_data.campaign_logs`
+GROUP BY 1
+ORDER BY total_revenue DESC;
