@@ -1,6 +1,6 @@
-# GoIT Portfolio Projects
+# Web Development & Design Collection
 
-This repository contains data analytics projects completed during the GoIT Data Analytics course.
+This repository contains data analytics projects completed during the Web-Development-Bootcamp.
 
 ## 📁 Projects
 
